@@ -58,6 +58,7 @@ body.dark {
   --glass-bg: rgba(18, 17, 16, 0.7);
   --glass-nav-bg: rgba(18, 17, 16, 0.85);
   --glass-border: rgba(51, 49, 48, 0.6);
+  --coral-soft: rgba(219, 84, 64, 0.15);
   background-image: radial-gradient(circle at 50% 0%, rgba(219,84,64,0.06), transparent 60%);
 }
 

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { X, Check, Moon, Sun, Monitor, LogIn, LogOut } from "lucide-react";
+import { X, Check, Moon, Sun, Monitor, LogIn, LogOut, AlertTriangle } from "lucide-react";
 import { DEFAULT_MODEL } from "../lib/gemini";
 import { useStore } from "../store/useStore";
 import { loginWithGoogle, logout } from "../lib/firebase";
@@ -9,11 +9,12 @@ const MODELS = [
 ];
 
 export default function Settings({ onClose }: { onClose: () => void }) {
-  const { model, setModel, theme, setTheme, user } = useStore();
+  const { model, setModel, theme, setTheme, user, resetProgress } = useStore();
   const [mdl, setMdl] = useState(model || DEFAULT_MODEL);
   const [thm, setThm] = useState(theme || "system");
   const [saved, setSaved] = useState(false);
   const [loginError, setLoginError] = useState("");
+  const [confirmReset, setConfirmReset] = useState(false);
 
   const handleLogin = async () => {
     setLoginError("");
@@ -29,6 +30,16 @@ export default function Settings({ onClose }: { onClose: () => void }) {
     setTheme(thm);
     setSaved(true);
     setTimeout(() => setSaved(false), 1400);
+  };
+
+  const handleReset = () => {
+    if (!confirmReset) {
+      setConfirmReset(true);
+      return;
+    }
+    resetProgress();
+    setConfirmReset(false);
+    onClose();
   };
 
   return (
@@ -96,6 +107,15 @@ export default function Settings({ onClose }: { onClose: () => void }) {
           {saved ? <><Check size={18} /> Saved</> : "Save"}
         </button>
 
+        <div style={{ margin: "28px 0 6px" }}><span className="eyebrow" style={{ color: "var(--coral)" }}>Danger Zone</span></div>
+        <div style={{ padding: "14px 16px", background: "var(--coral-soft)", border: "1px solid rgba(219,84,64,0.2)", borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div style={{ fontSize: 13.5, color: "var(--coral)", fontWeight: 600 }}>
+            Start over from scratch
+          </div>
+          <button className="tap" onClick={handleReset} style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", background: "var(--coral)", borderRadius: 10, fontSize: 13.5, fontWeight: 600, color: "#fff" }}>
+            {confirmReset ? "Are you sure?" : <><AlertTriangle size={16} /> Reset Progress</>}
+          </button>
+        </div>
 
       </div>
     </div>

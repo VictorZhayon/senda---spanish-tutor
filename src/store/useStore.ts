@@ -51,6 +51,7 @@ interface SendaState {
   setTheme: (theme: 'light' | 'dark' | 'system') => void;
   setUser: (user: User | null) => void;
   syncFromCloud: (data: any) => void;
+  resetProgress: () => void;
 }
 
 export const useStore = create<SendaState>()(
@@ -85,6 +86,12 @@ export const useStore = create<SendaState>()(
         model: data.model || state.model,
         theme: data.theme || state.theme
       })),
+      resetProgress: () => set({
+        progress: { xp: 0, streak: 0, lastDay: null, completed: [] },
+        srs: {},
+        day: freshDay(),
+        genLessons: [],
+      }),
 
       bumpStreak: () => {
         const { progress } = get();
