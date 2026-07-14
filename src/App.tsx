@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
 import {
   Flame, Settings as SettingsIcon, ArrowLeft, RotateCcw, GraduationCap,
   MessageCircle, Compass, BookOpen, Check, Lock, Sparkles, Loader2,
@@ -10,6 +10,7 @@ import { dueCards } from "./lib/srs";
 import { generatePracticeLesson } from "./lib/gemini";
 
 import { useStore } from "./store/useStore";
+import { auth, loadUserData, saveUserData } from "./lib/firebase";
 
 import { Dial, Block, Empty, Pill } from "./components/ui";
 import Review from "./components/Review";
@@ -21,13 +22,43 @@ import Settings from "./components/Settings";
 export default function App() {
   const {
     tab, view, setTab, setView, activeLessonId, setActiveLessonId,
-    progress, srs, day, genLessons, model,
+    progress, srs, day, genLessons, model, theme, user, setUser, syncFromCloud,
     finishBlock, gradeCard, completeLesson, addGenLesson
   } = useStore();
 
   const [showSettings, setShowSettings] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [genError, setGenError] = useState("");
+
+  // Sync theme to body class
+  useEffect(() => {
+    const isDark = theme === "dark" || (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    document.body.classList.toggle("dark", isDark);
+  }, [theme]);
+
+  // Listen to Auth State
+  useEffect(() => {
+    if (!auth) return;
+    const unsub = auth.onAuthStateChanged(async (u) => {
+      setUser(u);
+      if (u) {
+        const data = await loadUserData(u.uid);
+        if (data) syncFromCloud(data);
+      }
+    });
+    return unsub;
+  }, [setUser, syncFromCloud]);
+
+  // Sync state to Cloud
+  const stateRef = useRef({ progress, srs, day, genLessons, model, theme });
+  useEffect(() => {
+    stateRef.current = { progress, srs, day, genLessons, model, theme };
+    if (!user) return;
+    const timer = setTimeout(() => {
+      saveUserData(user.uid, stateRef.current);
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [progress, srs, day, genLessons, model, theme, user]);
 
   const allLessons = useMemo(() => [...LESSONS, ...genLessons], [genLessons]);
   const nextLesson = useMemo(

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import type { User } from 'firebase/auth';
 import { DEFAULT_MODEL } from '../lib/gemini';
 import { schedule, DAY } from '../lib/srs';
 
@@ -34,6 +35,8 @@ interface SendaState {
   day: DaySession;
   genLessons: any[]; // Generated lessons
   model: string;
+  theme: 'light' | 'dark' | 'system';
+  user: User | null;
 
   // Actions
   setTab: (tab: string) => void;
@@ -45,6 +48,9 @@ interface SendaState {
   gradeCard: (card: any, g: number) => void;
   completeLesson: (lesson: any) => void;
   addGenLesson: (lesson: any) => void;
+  setTheme: (theme: 'light' | 'dark' | 'system') => void;
+  setUser: (user: User | null) => void;
+  syncFromCloud: (data: any) => void;
 }
 
 export const useStore = create<SendaState>()(
@@ -61,12 +67,24 @@ export const useStore = create<SendaState>()(
       day: freshDay(),
       genLessons: [],
       model: DEFAULT_MODEL,
+      theme: 'system',
+      user: null,
 
       // Actions
       setTab: (tab) => set({ tab }),
       setView: (view) => set({ view }),
       setActiveLessonId: (activeLessonId) => set({ activeLessonId }),
       setModel: (model) => set({ model }),
+      setTheme: (theme) => set({ theme }),
+      setUser: (user) => set({ user }),
+      syncFromCloud: (data) => set((state) => ({
+        progress: data.progress || state.progress,
+        srs: data.srs || state.srs,
+        day: data.day?.date === todayKey() ? data.day : freshDay(),
+        genLessons: data.genLessons || state.genLessons,
+        model: data.model || state.model,
+        theme: data.theme || state.theme
+      })),
 
       bumpStreak: () => {
         const { progress } = get();
@@ -137,7 +155,8 @@ export const useStore = create<SendaState>()(
         srs: state.srs,
         day: state.day?.date === todayKey() ? state.day : freshDay(),
         genLessons: state.genLessons,
-        model: state.model
+        model: state.model,
+        theme: state.theme
       }),
     }
   )

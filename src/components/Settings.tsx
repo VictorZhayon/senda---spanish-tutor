@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { X, Key, ExternalLink, Trash2, Check } from "lucide-react";
+import { X, Check, Moon, Sun, Monitor, LogIn, LogOut } from "lucide-react";
 import { DEFAULT_MODEL } from "../lib/gemini";
 import { useStore } from "../store/useStore";
+import { loginWithGoogle, logout } from "../lib/firebase";
 
 const MODELS = [
   ["gemini-2.5-flash", "Flash — fast & cheap (recommended)"],
@@ -10,12 +11,14 @@ const MODELS = [
 ];
 
 export default function Settings({ onClose }: { onClose: () => void }) {
-  const { model, setModel } = useStore();
+  const { model, setModel, theme, setTheme, user } = useStore();
   const [mdl, setMdl] = useState(model || DEFAULT_MODEL);
+  const [thm, setThm] = useState(theme || "system");
   const [saved, setSaved] = useState(false);
 
   const save = () => {
     setModel(mdl);
+    setTheme(thm);
     setSaved(true);
     setTimeout(() => setSaved(false), 1400);
   };
@@ -31,7 +34,40 @@ export default function Settings({ onClose }: { onClose: () => void }) {
           <button className="tap" onClick={onClose} aria-label="Close" style={{ padding: 6 }}><X size={22} /></button>
         </div>
 
+        <div style={{ margin: "18px 0 6px" }}><span className="eyebrow">Account (Cloud Sync)</span></div>
+        <div style={{ padding: "14px 16px", background: "var(--card)", border: "1px solid var(--line)", borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div style={{ fontSize: 14.5 }}>
+            {user ? (
+              <><span style={{ fontWeight: 600 }}>{user.displayName}</span><br /><span style={{ color: "var(--ink-soft)", fontSize: 13 }}>Synced to cloud</span></>
+            ) : (
+              <><span style={{ fontWeight: 600 }}>Not signed in</span><br /><span style={{ color: "var(--ink-soft)", fontSize: 13 }}>Sign in to save your progress</span></>
+            )}
+          </div>
+          {user ? (
+            <button className="tap" onClick={logout} style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", background: "var(--paper-2)", borderRadius: 10, fontSize: 13.5, fontWeight: 600, color: "var(--coral)" }}>
+              <LogOut size={16} /> Sign out
+            </button>
+          ) : (
+            <button className="tap" onClick={loginWithGoogle} style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", background: "var(--teal)", borderRadius: 10, fontSize: 13.5, fontWeight: 600, color: "#fff" }}>
+              <LogIn size={16} /> Sign in
+            </button>
+          )}
+        </div>
 
+        <div style={{ margin: "18px 0 6px" }}><span className="eyebrow">Appearance</span></div>
+        <div style={{ display: "flex", gap: 8 }}>
+          {[
+            { id: "light", icon: Sun, label: "Light" },
+            { id: "dark", icon: Moon, label: "Dark" },
+            { id: "system", icon: Monitor, label: "System" },
+          ].map(({ id, icon: Icon, label }) => (
+            <button key={id} className="tap" onClick={() => setThm(id as any)}
+              style={{ flex: 1, padding: "12px 0", border: `1.5px solid ${thm === id ? "var(--teal)" : "var(--line)"}`, background: thm === id ? "var(--teal-tint)" : "var(--card)", borderRadius: 12, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, color: thm === id ? "var(--teal-deep)" : "var(--ink)" }}>
+              <Icon size={18} />
+              <span style={{ fontSize: 13, fontWeight: 600 }}>{label}</span>
+            </button>
+          ))}
+        </div>
 
         <div style={{ margin: "18px 0 6px" }}><span className="eyebrow">Model</span></div>
         <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>

@@ -31,13 +31,26 @@
 html, body, #root { height: 100%; margin: 0; }
 
 body {
+  margin: 0;
   font-family: "Hanken Grotesk", system-ui, -apple-system, sans-serif;
-  color: var(--ink);
   background: var(--paper);
-  background-image: radial-gradient(circle at 50% 0%, #ffffff 0%, transparent 100%);
-  background-attachment: fixed;
+  background-image: radial-gradient(circle at 50% 0%, rgba(219,84,64,0.03), transparent 60%);
+  color: var(--ink);
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+  min-height: 100dvh;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+body.dark {
+  --paper: #121110;
+  --paper-2: #1e1d1c;
+  --card: rgba(30, 29, 28, 0.7);
+  --line: #333130;
+  --ink: #f0ebe4;
+  --ink-soft: #a8a49c;
+  --ink-faint: #6e6b66;
+  background-image: radial-gradient(circle at 50% 0%, rgba(219,84,64,0.06), transparent 60%);
 }
 
 /* Typography refinements */
