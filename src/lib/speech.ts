@@ -42,3 +42,64 @@ if (typeof window !== "undefined" && "speechSynthesis" in window) {
 export function cleanForSpeech(text: string) {
   return text.replace(/✏️.*(\n|$)/g, "").replace(/\(.*?\)/g, "").trim();
 }
+
+// --- Speech Recognition ---
+
+export function listen(
+  onResult: (text: string, isFinal: boolean) => void,
+  onError: (err: string) => void,
+  onEnd: () => void
+): { stop: () => void } | null {
+  const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+  
+  if (!SpeechRecognition) {
+    onError("Speech recognition is not supported in this browser.");
+    onEnd();
+    return null;
+  }
+
+  const recognition = new SpeechRecognition();
+  recognition.lang = "es-MX";
+  recognition.interimResults = true;
+  recognition.maxAlternatives = 1;
+
+  recognition.onresult = (event: any) => {
+    let interimTranscript = "";
+    let finalTranscript = "";
+
+    for (let i = event.resultIndex; i < event.results.length; ++i) {
+      if (event.results[i].isFinal) {
+        finalTranscript += event.results[i][0].transcript;
+      } else {
+        interimTranscript += event.results[i][0].transcript;
+      }
+    }
+
+    if (finalTranscript) {
+      onResult(finalTranscript, true);
+    } else if (interimTranscript) {
+      onResult(interimTranscript, false);
+    }
+  };
+
+  recognition.onerror = (event: any) => {
+    if (event.error === "no-speech") return; // ignore silence
+    onError("Microphone error: " + event.error);
+  };
+
+  recognition.onend = () => {
+    onEnd();
+  };
+
+  try {
+    recognition.start();
+  } catch (err) {
+    onError("Failed to start microphone.");
+    onEnd();
+    return null;
+  }
+
+  return {
+    stop: () => recognition.stop()
+  };
+}

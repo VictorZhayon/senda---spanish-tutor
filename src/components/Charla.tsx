@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
-import { MessageCircle, Send, Loader2, Settings as SettingsIcon } from "lucide-react";
+import { MessageCircle, Send, Loader2, Settings as SettingsIcon, Mic, MicOff } from "lucide-react";
 import { Speaker } from "./ui";
 import { tutorReply, tutorOpener, GeminiError } from "../lib/gemini";
-import { cleanForSpeech } from "../lib/speech";
+import { cleanForSpeech, listen } from "../lib/speech";
 import { useStore } from "../store/useStore";
 
 function friendlyError(e: unknown) {
@@ -21,7 +21,17 @@ export default function Charla({ seedVocab, onFirstReply, onOpenSettings }: { se
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
   const [started, setStarted] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [micError, setMicError] = useState("");
+  const micRef = useRef<{ stop: () => void } | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
+
+  // Cleanup mic on unmount
+  useEffect(() => {
+    return () => {
+      if (micRef.current) micRef.current.stop();
+    };
+  }, []);
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [msgs, loading]);
 
@@ -50,6 +60,40 @@ export default function Charla({ seedVocab, onFirstReply, onOpenSettings }: { se
       setErr(friendlyError(e));
     }
     setLoading(false);
+  };
+
+  const toggleMic = () => {
+    if (isListening) {
+      if (micRef.current) {
+        micRef.current.stop();
+        micRef.current = null;
+      }
+      setIsListening(false);
+      return;
+    }
+
+    setMicError("");
+    setIsListening(true);
+    micRef.current = listen(
+      (text, isFinal) => {
+        // Overwrite the input with the spoken text.
+        // We let the user review it before sending.
+        setInput(text);
+        if (isFinal) {
+          setIsListening(false);
+          micRef.current = null;
+        }
+      },
+      (err) => {
+        setMicError(err);
+        setIsListening(false);
+        micRef.current = null;
+      },
+      () => {
+        setIsListening(false);
+        micRef.current = null;
+      }
+    );
   };
 
   if (!started) {
@@ -91,14 +135,23 @@ export default function Charla({ seedVocab, onFirstReply, onOpenSettings }: { se
         ))}
         {loading && <div style={{ alignSelf: "flex-start", color: "var(--ink-soft)" }}><Loader2 size={18} className="spin" /></div>}
         {err && <div style={{ color: "var(--coral)", fontSize: 13 }}>{err}</div>}
+        {micError && <div style={{ color: "var(--coral)", fontSize: 13 }}>{micError}</div>}
         <div ref={endRef} />
       </div>
       <div style={{ display: "flex", gap: 8, alignItems: "flex-end", paddingTop: 8, borderTop: "1px solid var(--line)" }}>
+        <button
+          className={`tap mic-btn ${isListening ? "recording" : ""}`}
+          onClick={toggleMic}
+          aria-label={isListening ? "Stop listening" : "Start listening"}
+          style={{ background: "var(--paper-2)", color: "var(--ink-soft)", borderRadius: 12, padding: 12, flexShrink: 0 }}
+        >
+          {isListening ? <Mic size={18} /> : <MicOff size={18} />}
+        </button>
         <textarea value={input} onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
           rows={1} placeholder="Escribe en español…" aria-label="Your message in Spanish"
           style={{ flex: 1, resize: "none", border: "1px solid var(--line)", borderRadius: 12, padding: "11px 13px", fontSize: 15, background: "var(--card)", outline: "none", maxHeight: 120 }} />
-        <button className="tap" onClick={send} disabled={loading} aria-label="Send" style={{ background: "var(--coral)", color: "#fff", borderRadius: 12, padding: 12, opacity: loading ? 0.5 : 1 }}>
+        <button className="tap" onClick={send} disabled={loading || isListening} aria-label="Send" style={{ background: "var(--coral)", color: "#fff", borderRadius: 12, padding: 12, opacity: (loading || isListening) ? 0.5 : 1, flexShrink: 0 }}>
           <Send size={18} />
         </button>
       </div>
