@@ -25,6 +25,11 @@
   --shadow-md: 0 4px 12px -2px rgba(28, 24, 21, 0.08), 0 8px 24px -4px rgba(28, 24, 21, 0.04);
   --shadow-lg: 0 12px 32px -4px rgba(28, 24, 21, 0.1), 0 24px 64px -8px rgba(28, 24, 21, 0.06);
   --shadow-glow: 0 0 24px rgba(13, 131, 121, 0.2);
+
+  /* Glassmorphism */
+  --glass-bg: rgba(251, 246, 236, 0.7);
+  --glass-nav-bg: rgba(251, 246, 236, 0.85);
+  --glass-border: rgba(227, 217, 199, 0.6);
 }
 
 * { box-sizing: border-box; }
@@ -50,6 +55,9 @@ body.dark {
   --ink: #f0ebe4;
   --ink-soft: #a8a49c;
   --ink-faint: #6e6b66;
+  --glass-bg: rgba(18, 17, 16, 0.7);
+  --glass-nav-bg: rgba(18, 17, 16, 0.85);
+  --glass-border: rgba(51, 49, 48, 0.6);
   background-image: radial-gradient(circle at 50% 0%, rgba(219,84,64,0.06), transparent 60%);
 }
 
@@ -98,10 +106,10 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, [tabindex]:fo
   position: sticky;
   top: 0;
   z-index: 20;
-  background: rgba(251, 246, 236, 0.7);
+  background: var(--glass-bg);
   backdrop-filter: blur(16px) saturate(180%);
   -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border-bottom: 1px solid rgba(227, 217, 199, 0.5);
+  border-bottom: 1px solid var(--glass-border);
 }
 
 .glass-nav {
@@ -110,10 +118,10 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, [tabindex]:fo
   left: 0;
   right: 0;
   z-index: 20;
-  background: rgba(251, 246, 236, 0.85);
+  background: var(--glass-nav-bg);
   backdrop-filter: blur(20px) saturate(200%);
   -webkit-backdrop-filter: blur(20px) saturate(200%);
-  border-top: 1px solid rgba(227, 217, 199, 0.6);
+  border-top: 1px solid var(--glass-border);
   box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.03);
 }
 

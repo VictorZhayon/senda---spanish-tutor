@@ -6,8 +6,6 @@ import { loginWithGoogle, logout } from "../lib/firebase";
 
 const MODELS = [
   ["gemini-2.5-flash", "Flash — fast & cheap (recommended)"],
-  ["gemini-2.5-pro", "Pro — slower, more capable"],
-  ["gemini-3.5-flash", "3.5 Flash — newest fast model"],
 ];
 
 export default function Settings({ onClose }: { onClose: () => void }) {
@@ -15,6 +13,16 @@ export default function Settings({ onClose }: { onClose: () => void }) {
   const [mdl, setMdl] = useState(model || DEFAULT_MODEL);
   const [thm, setThm] = useState(theme || "system");
   const [saved, setSaved] = useState(false);
+  const [loginError, setLoginError] = useState("");
+
+  const handleLogin = async () => {
+    setLoginError("");
+    try {
+      await loginWithGoogle();
+    } catch (e: any) {
+      setLoginError(e.message || "Failed to sign in. Check your Firebase config in .env.");
+    }
+  };
 
   const save = () => {
     setModel(mdl);
@@ -48,9 +56,12 @@ export default function Settings({ onClose }: { onClose: () => void }) {
               <LogOut size={16} /> Sign out
             </button>
           ) : (
-            <button className="tap" onClick={loginWithGoogle} style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", background: "var(--teal)", borderRadius: 10, fontSize: 13.5, fontWeight: 600, color: "#fff" }}>
-              <LogIn size={16} /> Sign in
-            </button>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 }}>
+              <button className="tap" onClick={handleLogin} style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", background: "var(--teal)", borderRadius: 10, fontSize: 13.5, fontWeight: 600, color: "#fff" }}>
+                <LogIn size={16} /> Sign in
+              </button>
+              {loginError && <div style={{ color: "var(--coral)", fontSize: 12, maxWidth: 200, textAlign: "right" }}>{loginError}</div>}
+            </div>
           )}
         </div>
 
