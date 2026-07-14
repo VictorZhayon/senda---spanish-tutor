@@ -1,13 +1,13 @@
 import React, { useState } from "react";
-import { Speaker } from "./ui.jsx";
+import { Speaker } from "./ui";
 
-export default function Review({ deck, onGrade, onDone }) {
+export default function Review({ deck, onGrade, onDone }: { deck: any[]; onGrade: (card: any, g: number) => void; onDone: () => void }) {
   const [i, setI] = useState(0);
   const [flipped, setFlipped] = useState(false);
   if (!deck.length) return null;
   const card = deck[i];
 
-  const grade = (g) => {
+  const grade = (g: number) => {
     onGrade(card, g);
     setFlipped(false);
     if (i + 1 < deck.length) setTimeout(() => setI(i + 1), 120);
@@ -49,7 +49,12 @@ export default function Review({ deck, onGrade, onDone }) {
         </button>
       ) : (
         <div className="rise" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 8, marginTop: 18 }}>
-          {[["Again", 0, "var(--coral)"], ["Hard", 1, "#b9892e"], ["Good", 2, "var(--teal)"], ["Easy", 3, "var(--teal-deep)"]].map(([label, g, col]) => (
+          {(Object.entries({
+            Again: { g: 0, col: "var(--coral)" },
+            Hard: { g: 1, col: "#b9892e" },
+            Good: { g: 2, col: "var(--teal)" },
+            Easy: { g: 3, col: "var(--teal-deep)" }
+          }) as [string, { g: number, col: string }][]).map(([label, { g, col }]) => (
             <button key={g} className="tap" onClick={() => grade(g)} style={{ padding: "11px 4px", borderRadius: 12, background: "var(--card)", border: `1.5px solid ${col}`, color: col, fontWeight: 700, fontSize: 12.5 }}>
               {label}
             </button>

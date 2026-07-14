@@ -3,7 +3,19 @@
 
 export const DAY = 86400000;
 
-export function schedule(card, grade) {
+export interface Card {
+  es: string;
+  en: string;
+  ex?: string;
+  exEn?: string;
+  interval?: number;
+  ease?: number;
+  reps?: number;
+  due?: number;
+  seen?: boolean;
+}
+
+export function schedule(card: Card, grade: number): Card {
   let interval = card.interval || 0;
   let ease = card.ease || 2.5;
   let reps = card.reps || 0;
@@ -26,7 +38,7 @@ export function schedule(card, grade) {
 }
 
 // Cards whose due time has passed, soonest first, capped for a short session.
-export function dueCards(srs, now = Date.now(), cap = 20) {
+export function dueCards(srs: Record<string, Card>, now = Date.now(), cap = 20): Card[] {
   return Object.values(srs)
     .filter((c) => (c.due || 0) <= now)
     .sort((a, b) => (a.due || 0) - (b.due || 0))

@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
 import { MessageCircle, Send, Loader2, Settings as SettingsIcon } from "lucide-react";
-import { Speaker } from "./ui.jsx";
-import { tutorReply, tutorOpener, GeminiError } from "../lib/gemini.js";
-import { cleanForSpeech } from "../lib/speech.js";
+import { Speaker } from "./ui";
+import { tutorReply, tutorOpener, GeminiError } from "../lib/gemini";
+import { cleanForSpeech } from "../lib/speech";
+import { useStore } from "../store/useStore";
 
-function friendlyError(e) {
+function friendlyError(e: unknown) {
   const code = e instanceof GeminiError ? e.code : "UNKNOWN";
   if (code === "NO_KEY") return "Add your Gemini API key in Settings to chat with Lucía.";
   if (code === "BAD_KEY") return "That API key looks invalid. Check it in Settings.";
@@ -13,13 +14,14 @@ function friendlyError(e) {
   return "Something went wrong. Try again.";
 }
 
-export default function Charla({ seedVocab, apiKey, model, onFirstReply, onOpenSettings }) {
-  const [msgs, setMsgs] = useState([]);
+export default function Charla({ seedVocab, onFirstReply, onOpenSettings }: { seedVocab: any[]; onFirstReply?: () => void; onOpenSettings: () => void }) {
+  const { apiKey, model } = useStore();
+  const [msgs, setMsgs] = useState<{ role: "user" | "assistant"; content: string }[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
   const [started, setStarted] = useState(false);
-  const endRef = useRef(null);
+  const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [msgs, loading]);
 
@@ -38,7 +40,7 @@ export default function Charla({ seedVocab, apiKey, model, onFirstReply, onOpenS
   const send = async () => {
     const text = input.trim();
     if (!text || loading) return;
-    const next = [...msgs, { role: "user", content: text }];
+    const next: { role: "user" | "assistant"; content: string }[] = [...msgs, { role: "user", content: text }];
     setMsgs(next); setInput(""); setLoading(true); setErr("");
     try {
       const reply = await tutorReply(next, { key: apiKey, model });
@@ -74,7 +76,7 @@ export default function Charla({ seedVocab, apiKey, model, onFirstReply, onOpenS
   }
 
   return (
-    <div className="rise" style={{ maxWidth: 520, margin: "0 auto", display: "flex", flexDirection: "column", height: "min(62vh, 540px)" }}>
+    <div className="rise charla-container" style={{ maxWidth: 520, margin: "0 auto", display: "flex", flexDirection: "column", height: "min(62vh, 540px)" }}>
       <div className="scroll" style={{ flex: 1, overflowY: "auto", padding: "4px 2px 12px", display: "flex", flexDirection: "column", gap: 10 }}>
         {msgs.map((m, i) => (
           <div key={i} style={{ alignSelf: m.role === "user" ? "flex-end" : "flex-start", maxWidth: "85%" }}>

@@ -1,56 +1,46 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import {
   Flame, Settings as SettingsIcon, ArrowLeft, RotateCcw, GraduationCap,
   MessageCircle, Compass, BookOpen, Check, Lock, Sparkles, Loader2,
 } from "lucide-react";
 
-import { LESSONS } from "./data/lessons.js";
-import { REFERENCE } from "./data/reference.js";
-import { load, save, todayKey } from "./lib/storage.js";
-import { schedule, dueCards, DAY } from "./lib/srs.js";
-import { DEFAULT_MODEL, generatePracticeLesson } from "./lib/gemini.js";
+import { LESSONS, Lesson as LessonType } from "./data/lessons";
+import { REFERENCE } from "./data/reference";
+import { dueCards } from "./lib/srs";
+import { generatePracticeLesson } from "./lib/gemini";
 
-import { Dial, Block, Empty, Pill, Speaker } from "./components/ui.jsx";
-import Review from "./components/Review.jsx";
-import Lesson from "./components/Lesson.jsx";
-import Charla from "./components/Charla.jsx";
-import AskBox from "./components/AskBox.jsx";
-import Settings from "./components/Settings.jsx";
+import { useStore } from "./store/useStore";
 
-const freshDay = () => ({ date: todayKey(), repasar: false, aprender: false, hablar: false });
+import { Dial, Block, Empty, Pill } from "./components/ui";
+import Review from "./components/Review";
+import Lesson from "./components/Lesson";
+import Charla from "./components/Charla";
+import AskBox from "./components/AskBox";
+import Settings from "./components/Settings";
 
 export default function App() {
-  const [tab, setTab] = useState("hoy");
-  const [view, setView] = useState(null); // null | 'repasar' | 'aprender' | 'hablar'
-  const [showSettings, setShowSettings] = useState(false);
+  const {
+    tab, view, setTab, setView, activeLessonId, setActiveLessonId,
+    progress, srs, day, genLessons, apiKey, model,
+    finishBlock, gradeCard, completeLesson, addGenLesson
+  } = useStore();
 
-  const [progress, setProgress] = useState(() => load("progress", { xp: 0, streak: 0, lastDay: null, completed: [] }));
-  const [srs, setSrs] = useState(() => load("srs", {}));
-  const [day, setDay] = useState(() => {
-    const d = load("day", null);
-    return d && d.date === todayKey() ? d : freshDay();
-  });
-  const [genLessons, setGenLessons] = useState(() => load("genLessons", []));
-  const [apiKey, setApiKey] = useState(() => load("geminiKey", ""));
-  const [model, setModel] = useState(() => load("model", DEFAULT_MODEL));
+  const [showSettings, setShowSettings] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [genError, setGenError] = useState("");
-  const [activeLessonId, setActiveLessonId] = useState(null);
-
-  useEffect(() => save("progress", progress), [progress]);
-  useEffect(() => save("srs", srs), [srs]);
-  useEffect(() => save("day", day), [day]);
-  useEffect(() => save("genLessons", genLessons), [genLessons]);
 
   const allLessons = useMemo(() => [...LESSONS, ...genLessons], [genLessons]);
   const nextLesson = useMemo(
     () => allLessons.find((l) => !progress.completed.includes(l.id)) || null,
     [allLessons, progress.completed]
   );
+  
+  // Re-evaluate due deck whenever `view` changes, or `srs` changes
   const dueDeck = useMemo(() => dueCards(srs), [srs, view]);
+  
   const knownWords = useMemo(() => {
     const done = new Set(progress.completed);
-    return allLessons.filter((l) => done.has(l.id)).flatMap((l) => l.vocab.map((v) => v.es));
+    return allLessons.filter((l) => done.has(l.id)).flatMap((l) => l.vocab.map((v: any) => v.es));
   }, [allLessons, progress.completed]);
 
   const lastDoneVocab = useMemo(() => {
@@ -62,41 +52,6 @@ export default function App() {
     return (nextLesson || allLessons[0]).vocab;
   }, [progress.completed, allLessons, nextLesson]);
 
-  /* ---------- actions ---------- */
-  function bumpStreak() {
-    setProgress((p) => {
-      const t = todayKey();
-      if (p.lastDay === t) return p;
-      const yest = new Date(Date.now() - DAY).toISOString().slice(0, 10);
-      return { ...p, streak: p.lastDay === yest ? p.streak + 1 : 1, lastDay: t };
-    });
-  }
-
-  function finishBlock(name, xp = 15) {
-    bumpStreak();
-    setProgress((p) => ({ ...p, xp: p.xp + xp }));
-    setDay((d) => ({ ...d, [name]: true }));
-    setView(null);
-  }
-
-  function gradeCard(card, g) {
-    setSrs((s) => ({ ...s, [card.es]: schedule({ ...card, ...(s[card.es] || {}) }, g) }));
-  }
-
-  function completeLesson(lesson) {
-    setSrs((s) => {
-      const next = { ...s };
-      const due = Date.now() + DAY;
-      lesson.vocab.forEach((v) => {
-        if (!next[v.es]) next[v.es] = { ...v, due, interval: 0, ease: 2.5, reps: 0 };
-      });
-      return next;
-    });
-    setProgress((p) => p.completed.includes(lesson.id) ? p : { ...p, completed: [...p.completed, lesson.id], xp: p.xp + 5 });
-    finishBlock("aprender");
-    setActiveLessonId(null);
-  }
-
   async function makePracticeLesson() {
     if (!apiKey) { setShowSettings(true); return; }
     setGenerating(true); setGenError("");
@@ -104,11 +59,11 @@ export default function App() {
       const data = await generatePracticeLesson(knownWords, { key: apiKey, model });
       const lesson = {
         id: "gen-" + (genLessons.length + 1),
-        week: null, level: "Extra", title: data.title || "Práctica",
+        week: 0, level: "Extra", title: data.title || "Práctica",
         focus: data.focus || "AI practice", explainer: data.explainer || [], vocab: data.vocab || [],
       };
       if (!lesson.vocab.length) throw new Error("empty");
-      setGenLessons((g) => [...g, lesson]);
+      addGenLesson(lesson);
     } catch {
       setGenError("Couldn't generate a lesson right now. Check your key and connection, then retry.");
     }
@@ -118,11 +73,10 @@ export default function App() {
   const blocksDone = [day.repasar, day.aprender, day.hablar].filter(Boolean).length;
   const viewLesson = activeLessonId ? allLessons.find((l) => l.id === activeLessonId) : nextLesson;
 
-  /* ---------- session views ---------- */
   if (view) {
     const back = () => { setView(null); setActiveLessonId(null); };
     return (
-      <Shell tab={tab} setTab={(t) => { back(); setTab(t); }} progress={progress} onSettings={() => setShowSettings(true)}>
+      <Shell onSettings={() => setShowSettings(true)}>
         <button className="tap" onClick={back} style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "var(--ink-soft)", fontSize: 14, marginBottom: 16 }}>
           <ArrowLeft size={17} /> Back
         </button>
@@ -137,19 +91,15 @@ export default function App() {
             : <CourseComplete generating={generating} genError={genError} onGenerate={makePracticeLesson} />
         )}
         {view === "hablar" && (
-          <Charla seedVocab={lastDoneVocab} apiKey={apiKey} model={model}
-            onFirstReply={() => { if (!day.hablar) finishBlock("hablar"); }}
-            onOpenSettings={() => setShowSettings(true)} />
+          <Charla seedVocab={lastDoneVocab} onFirstReply={() => { if (!day.hablar) finishBlock("hablar"); }} onOpenSettings={() => setShowSettings(true)} />
         )}
-        {showSettings && <Settings apiKey={apiKey} model={model} onClose={() => setShowSettings(false)}
-          onSave={(k, m) => { setApiKey(k); save("geminiKey", k); setModel(m); save("model", m); }} />}
+        {showSettings && <Settings onClose={() => setShowSettings(false)} />}
       </Shell>
     );
   }
 
-  /* ---------- tabs ---------- */
   return (
-    <Shell tab={tab} setTab={setTab} progress={progress} onSettings={() => setShowSettings(true)}>
+    <Shell onSettings={() => setShowSettings(true)}>
       {tab === "hoy" && (
         <div className="rise">
           <div style={{ display: "flex", alignItems: "center", gap: 18, marginBottom: 22 }}>
@@ -173,14 +123,14 @@ export default function App() {
             done={day.hablar} tone="coral" icon={<MessageCircle size={21} />} onClick={() => setView("hablar")} />
 
           <div style={{ marginTop: 22 }}>
-            <AskBox apiKey={apiKey} model={model} onOpenSettings={() => setShowSettings(true)} />
+            <AskBox onOpenSettings={() => setShowSettings(true)} />
           </div>
         </div>
       )}
 
       {tab === "curso" && (
         <CoursePath allLessons={allLessons} completed={progress.completed} nextId={nextLesson?.id}
-          onOpen={(id) => { setActiveLessonId(id); setView("aprender"); setTab("hoy"); }}
+          onOpen={(id: string) => { setActiveLessonId(id); setView("aprender"); setTab("hoy"); }}
           onGenerate={makePracticeLesson} generating={generating} genError={genError} hasNext={!!nextLesson} />
       )}
 
@@ -200,18 +150,16 @@ export default function App() {
             <div className="eyebrow" style={{ marginBottom: 6 }}>Dialect</div>
             <p style={{ fontSize: 14, lineHeight: 1.6, margin: 0, color: "var(--teal-deep)" }}>{REFERENCE.tip}</p>
           </div>
-          <AskBox apiKey={apiKey} model={model} onOpenSettings={() => setShowSettings(true)} />
+          <AskBox onOpenSettings={() => setShowSettings(true)} />
         </div>
       )}
 
-      {showSettings && <Settings apiKey={apiKey} model={model} onClose={() => setShowSettings(false)}
-        onSave={(k, m) => { setApiKey(k); save("geminiKey", k); setModel(m); save("model", m); }} />}
+      {showSettings && <Settings onClose={() => setShowSettings(false)} />}
     </Shell>
   );
 }
 
-/* ---------- course complete prompt ---------- */
-function CourseComplete({ generating, genError, onGenerate }) {
+function CourseComplete({ generating, genError, onGenerate }: any) {
   return (
     <div className="rise card" style={{ maxWidth: 460, margin: "0 auto", padding: 26, textAlign: "center" }}>
       <div style={{ fontSize: 38, marginBottom: 6 }}>🎉</div>
@@ -228,10 +176,9 @@ function CourseComplete({ generating, genError, onGenerate }) {
   );
 }
 
-/* ---------- course path ---------- */
-function CoursePath({ allLessons, completed, nextId, onOpen, onGenerate, generating, genError, hasNext }) {
+function CoursePath({ allLessons, completed, nextId, onOpen, onGenerate, generating, genError, hasNext }: any) {
   const done = new Set(completed);
-  let levelSeen = null;
+  let levelSeen: string | null = null;
   return (
     <div className="rise" style={{ maxWidth: 560, margin: "0 auto" }}>
       <span className="eyebrow">The path</span>
@@ -239,7 +186,7 @@ function CoursePath({ allLessons, completed, nextId, onOpen, onGenerate, generat
       <p style={{ fontSize: 13.5, color: "var(--ink-soft)", margin: "0 0 18px" }}>
         {done.size} of {allLessons.length} lessons · A1 → B1. Tap any unlocked lesson to study or revisit it.
       </p>
-      {allLessons.map((l) => {
+      {allLessons.map((l: any) => {
         const isDone = done.has(l.id);
         const isNext = l.id === nextId;
         const locked = !isDone && !isNext;
@@ -274,16 +221,16 @@ function CoursePath({ allLessons, completed, nextId, onOpen, onGenerate, generat
   );
 }
 
-/* ---------- shell (header + nav) ---------- */
-function Shell({ children, tab, setTab, progress, onSettings }) {
+function Shell({ children, onSettings }: { children: React.ReactNode, onSettings: () => void }) {
+  const { tab, setTab, progress } = useStore();
   const nav = [
     ["hoy", "Hoy", Compass],
     ["curso", "Curso", GraduationCap],
     ["ref", "Referencia", BookOpen],
-  ];
+  ] as const;
   return (
     <div style={{ minHeight: "100%", display: "flex", flexDirection: "column", background: "var(--paper)" }}>
-      <header style={{ position: "sticky", top: 0, zIndex: 20, background: "rgba(251,246,236,.9)", backdropFilter: "blur(8px)", borderBottom: "1px solid var(--line)" }}>
+      <header className="glass-header">
         <div style={{ maxWidth: 620, margin: "0 auto", padding: "12px 18px calc(12px + env(safe-area-inset-top))", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
             <span className="serif" style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-.02em" }}>Senda</span>
@@ -301,8 +248,8 @@ function Shell({ children, tab, setTab, progress, onSettings }) {
 
       <main style={{ flex: 1, width: "100%", maxWidth: 620, margin: "0 auto", padding: "22px 18px 96px" }}>{children}</main>
 
-      <nav style={{ position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 20, background: "rgba(251,246,236,.94)", backdropFilter: "blur(8px)", borderTop: "1px solid var(--line)" }}>
-        <div style={{ maxWidth: 620, margin: "0 auto", display: "flex", padding: "8px 12px calc(8px + env(safe-area-inset-bottom))" }}>
+      <nav className="glass-nav">
+        <div style={{ maxWidth: 620, margin: "0 auto", display: "flex", padding: "8px 12px calc(8px + env(safe-area-bottom))" }}>
           {nav.map(([id, label, Icon]) => {
             const on = tab === id;
             return (

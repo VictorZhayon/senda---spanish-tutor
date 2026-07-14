@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { ChevronRight } from "lucide-react";
-import { Speaker, Pill } from "./ui.jsx";
+import { Speaker, Pill } from "./ui";
+import { Lesson as LessonType, Vocab } from "../data/lessons";
 
-function VocabCard({ item, idx, total }) {
+function VocabCard({ item, idx, total }: { item: Vocab; idx: number; total: number }) {
   return (
     <div className="card rise" key={idx} style={{ padding: 24 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -22,7 +23,7 @@ function VocabCard({ item, idx, total }) {
   );
 }
 
-export default function Lesson({ lesson, onComplete }) {
+export default function Lesson({ lesson, onComplete }: { lesson: LessonType; onComplete: () => void }) {
   const [step, setStep] = useState(0); // 0 = explainer, then one per vocab item
   const total = 1 + lesson.vocab.length;
   const pct = Math.round((step / (total - 1)) * 100);

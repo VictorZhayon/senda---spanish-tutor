@@ -1,13 +1,13 @@
 import React from "react";
 import { Volume2, ChevronRight, Check } from "lucide-react";
-import { speak } from "../lib/speech.js";
+import { speak } from "../lib/speech";
 
-export function Speaker({ text, size = 16 }) {
+export function Speaker({ text, size = 16 }: { text: string; size?: number }) {
   return (
     <button
       aria-label={"Listen: " + text}
       onClick={(e) => { e.stopPropagation(); speak(text); }}
-      className="tap"
+      className="tap speaker-btn"
       style={{ color: "var(--teal)", display: "inline-flex", alignItems: "center", padding: 4, borderRadius: 8 }}
     >
       <Volume2 size={size} />
@@ -15,7 +15,7 @@ export function Speaker({ text, size = 16 }) {
   );
 }
 
-export function Pill({ children, tone = "teal" }) {
+export function Pill({ children, tone = "teal" }: { children: React.ReactNode; tone?: "teal" | "saffron" | "coral" }) {
   const map = {
     teal: ["var(--teal-tint)", "var(--teal-deep)"],
     saffron: ["var(--saffron-soft)", "#8a5a12"],
@@ -29,8 +29,7 @@ export function Pill({ children, tone = "teal" }) {
   );
 }
 
-// The signature element: the daily session dial with three arcs.
-export function Dial({ done }) {
+export function Dial({ done }: { done: { repasar: boolean; aprender: boolean; hablar: boolean } }) {
   const segs = [
     { key: "repasar", on: done.repasar, color: "var(--teal)" },
     { key: "aprender", on: done.aprender, color: "var(--saffron)" },
@@ -57,10 +56,10 @@ export function Dial({ done }) {
   );
 }
 
-export function Block({ label, sub, done, icon, tone, onClick, mins }) {
+export function Block({ label, sub, done, icon, tone, onClick, mins }: any) {
   const accent = tone === "teal" ? "var(--teal)" : tone === "saffron" ? "var(--saffron)" : "var(--coral)";
   return (
-    <button className="card tap" onClick={onClick}
+    <button className="card tap block-btn" onClick={onClick}
       style={{ width: "100%", textAlign: "left", padding: "15px 16px", marginBottom: 10, display: "flex", alignItems: "center", gap: 14, borderColor: done ? accent : "var(--line)" }}>
       <div style={{ width: 44, height: 44, borderRadius: 13, background: done ? accent : "var(--paper-2)", color: done ? "#fff" : accent, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
         {done ? <Check size={22} /> : icon}
@@ -77,12 +76,12 @@ export function Block({ label, sub, done, icon, tone, onClick, mins }) {
   );
 }
 
-export function Empty({ title, body, onDone, cta = "Got it" }) {
+export function Empty({ title, body, onDone, cta = "Got it" }: { title: string; body: string; onDone: () => void; cta?: string }) {
   return (
-    <div className="rise card" style={{ maxWidth: 440, margin: "0 auto", padding: 26, textAlign: "center" }}>
+    <div className="rise card empty-card" style={{ maxWidth: 440, margin: "0 auto", padding: 26, textAlign: "center" }}>
       <h3 className="serif" style={{ fontSize: 22, fontWeight: 600, margin: "0 0 8px" }}>{title}</h3>
       <p style={{ color: "var(--ink-soft)", fontSize: 14.5, lineHeight: 1.55, margin: "0 0 18px" }}>{body}</p>
-      <button className="tap" onClick={onDone} style={{ padding: "12px 24px", background: "var(--ink)", color: "#fff", borderRadius: 12, fontWeight: 700 }}>{cta}</button>
+      <button className="tap primary-btn" onClick={onDone} style={{ padding: "12px 24px", background: "var(--ink)", color: "#fff", borderRadius: 12, fontWeight: 700 }}>{cta}</button>
     </div>
   );
 }

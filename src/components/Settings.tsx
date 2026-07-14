@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { X, Key, ExternalLink, Trash2, Check } from "lucide-react";
-import { DEFAULT_MODEL } from "../lib/gemini.js";
+import { DEFAULT_MODEL } from "../lib/gemini";
+import { useStore } from "../store/useStore";
 
 const MODELS = [
   ["gemini-2.5-flash", "Flash — fast & cheap (recommended)"],
@@ -8,13 +9,15 @@ const MODELS = [
   ["gemini-3.5-flash", "3.5 Flash — newest fast model"],
 ];
 
-export default function Settings({ apiKey, model, onSave, onClose }) {
+export default function Settings({ onClose }: { onClose: () => void }) {
+  const { apiKey, model, setApiKey, setModel } = useStore();
   const [draft, setDraft] = useState(apiKey || "");
   const [mdl, setMdl] = useState(model || DEFAULT_MODEL);
   const [saved, setSaved] = useState(false);
 
   const save = () => {
-    onSave(draft.trim(), mdl);
+    setApiKey(draft.trim());
+    setModel(mdl);
     setSaved(true);
     setTimeout(() => setSaved(false), 1400);
   };
@@ -55,13 +58,13 @@ export default function Settings({ apiKey, model, onSave, onClose }) {
           ))}
         </div>
 
-        <button className="tap" onClick={save}
+        <button className="tap primary-btn" onClick={save}
           style={{ width: "100%", marginTop: 20, padding: 14, background: saved ? "var(--teal)" : "var(--ink)", color: "#fff", borderRadius: 13, fontWeight: 700, fontSize: 15, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
           {saved ? <><Check size={18} /> Saved</> : "Save"}
         </button>
 
         {apiKey && (
-          <button className="tap" onClick={() => { setDraft(""); onSave("", mdl); }}
+          <button className="tap" onClick={() => { setDraft(""); setApiKey(""); }}
             style={{ width: "100%", marginTop: 9, padding: 11, background: "transparent", color: "var(--coral)", borderRadius: 11, fontWeight: 600, fontSize: 13.5, display: "flex", alignItems: "center", justifyContent: "center", gap: 7 }}>
             <Trash2 size={15} /> Remove key from this device
           </button>

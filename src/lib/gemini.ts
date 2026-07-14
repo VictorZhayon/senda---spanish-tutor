@@ -6,22 +6,28 @@
 //   header: x-goog-api-key: <KEY>
 // Roles in `contents` are "user" and "model" (not "assistant").
 
-const ENDPOINT = (model) =>
+const ENDPOINT = (model: string) =>
   `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
 
 export const DEFAULT_MODEL = "gemini-2.5-flash";
 
 export class GeminiError extends Error {
-  constructor(code, message) {
+  code: string;
+  constructor(code: string, message?: string) {
     super(message || code);
     this.code = code;
   }
 }
 
+interface Message {
+  role: "user" | "assistant";
+  content: string;
+}
+
 // Map our chat history to Gemini `contents`. Gemini wants the first turn to be
 // "user", so if a generated opener leads, we prepend a tiny kickoff turn.
-function toContents(history) {
-  const c = history.map((m) => ({
+function toContents(history: Message[]) {
+  const c: any[] = history.map((m) => ({
     role: m.role === "assistant" ? "model" : "user",
     parts: [{ text: m.content }],
   }));
@@ -31,21 +37,30 @@ function toContents(history) {
   return c;
 }
 
+interface GenerateOpts {
+  key: string;
+  model?: string;
+  system?: string;
+  history?: Message[];
+  maxTokens?: number;
+  temperature?: number;
+}
+
 export async function geminiGenerate({
   key,
   model = DEFAULT_MODEL,
   system,
-  history,
+  history = [],
   maxTokens = 1024,
   temperature = 0.7,
-}) {
+}: GenerateOpts) {
   if (!key) throw new GeminiError("NO_KEY", "No API key set.");
 
-  const generationConfig = { temperature, maxOutputTokens: maxTokens };
+  const generationConfig: any = { temperature, maxOutputTokens: maxTokens };
   // thinkingConfig is valid for 2.5-series; skip it for other models.
   if (model.includes("2.5")) generationConfig.thinkingConfig = { thinkingBudget: 0 };
 
-  const body = { contents: toContents(history), generationConfig };
+  const body: any = { contents: toContents(history), generationConfig };
   if (system) body.systemInstruction = { parts: [{ text: system }] };
 
   let res;
@@ -69,7 +84,7 @@ export async function geminiGenerate({
   const cand = data.candidates && data.candidates[0];
   if (cand && cand.finishReason === "SAFETY") throw new GeminiError("BLOCKED", "Response was blocked. Try rephrasing.");
   const text = (cand?.content?.parts || [])
-    .map((p) => p.text)
+    .map((p: any) => p.text)
     .filter(Boolean)
     .join("\n")
     .trim();
@@ -86,11 +101,11 @@ export const TUTOR_SYSTEM =
 const ASK_SYSTEM =
   "You are a concise, encouraging Spanish tutor for an English-speaking learner (A1–B1), teaching neutral LATIN AMERICAN Spanish (tú/ustedes, no vosotros). Answer the question clearly in English with 1–3 short Spanish examples, each followed by its English meaning in parentheses. Keep it under ~130 words. No filler.";
 
-export async function tutorReply(history, opts) {
+export async function tutorReply(history: Message[], opts: GenerateOpts) {
   return geminiGenerate({ ...opts, system: TUTOR_SYSTEM, history });
 }
 
-export async function tutorOpener(seedWords, opts) {
+export async function tutorOpener(seedWords: string[], opts: GenerateOpts) {
   const words = seedWords.slice(0, 8).join(", ");
   return geminiGenerate({
     ...opts,
@@ -104,12 +119,12 @@ export async function tutorOpener(seedWords, opts) {
   });
 }
 
-export async function askTutor(question, opts) {
+export async function askTutor(question: string, opts: GenerateOpts) {
   return geminiGenerate({ ...opts, system: ASK_SYSTEM, history: [{ role: "user", content: question }], maxTokens: 700 });
 }
 
 // Generate an extra practice lesson once the built-in course is finished.
-export async function generatePracticeLesson(knownWords, opts) {
+export async function generatePracticeLesson(knownWords: string[], opts: GenerateOpts) {
   const sample = knownWords.slice(-40).join(", ");
   const sys =
     "You are a Spanish curriculum author. Create ONE short practice lesson in neutral Latin American Spanish (tú/ustedes, no vosotros) for an A2–B1 learner. " +

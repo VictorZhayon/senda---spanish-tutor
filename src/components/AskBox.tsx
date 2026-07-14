@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { Sparkles, Loader2 } from "lucide-react";
-import { askTutor, GeminiError } from "../lib/gemini.js";
+import { askTutor, GeminiError } from "../lib/gemini";
+import { useStore } from "../store/useStore";
 
-export default function AskBox({ apiKey, model, onOpenSettings }) {
+export default function AskBox({ onOpenSettings }: { onOpenSettings: () => void }) {
+  const { apiKey, model } = useStore();
   const [q, setQ] = useState("");
   const [a, setA] = useState("");
   const [loading, setLoading] = useState(false);

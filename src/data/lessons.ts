@@ -2,7 +2,25 @@
 // Frequency-first: earliest lessons teach the highest-leverage words & structures.
 // 40 lessons total: A1 (1–8), A2 (9–20), B1 (21–40).
 
-export const LESSONS = [
+export interface Vocab {
+  es: string;
+  en: string;
+  ex: string;
+  exEn: string;
+}
+
+export interface Lesson {
+  id: string;
+  week: number;
+  level: string;
+  title: string;
+  focus: string;
+  explainer: string[];
+  grammar?: { title: string; rows: string[][] };
+  vocab: Vocab[];
+}
+
+export const LESSONS: Lesson[] = [
   /* ============================ A1 ============================ */
   {
     id: "l1", week: 1, level: "A1", title: "Sonidos y saludos", focus: "The 5 vowels · greetings",

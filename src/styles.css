@@ -1,66 +1,149 @@
 :root {
-  --paper: #fbf6ec;
-  --paper-2: #f4ecda;
-  --card: #fffdf8;
-  --ink: #221b16;
-  --ink-soft: #7a6b5a;
-  --ink-faint: #a9997f;
-  --teal: #0f6e66;
-  --teal-deep: #0a4a45;
-  --teal-tint: #dcede9;
-  --saffron: #e69a2e;
-  --saffron-soft: #f6d9a6;
-  --coral: #c8503c;
-  --line: #e5d8bf;
+  /* Modernized Vibe Color Palette */
+  --paper: #f9f7f1;
+  --paper-2: #f2ebd9;
+  --card: #ffffff;
+  --ink: #1c1815;
+  --ink-soft: #6d6153;
+  --ink-faint: #9c8e7b;
+  
+  /* Richer accents */
+  --teal: #0d8379;
+  --teal-deep: #08554e;
+  --teal-tint: #e0f2f0;
+  
+  --saffron: #f2a229;
+  --saffron-soft: #fbe6c3;
+  
+  --coral: #db5440;
+  --coral-soft: #fae0dc;
+  
+  --line: #e3d9c7;
+  
+  /* Layout and FX */
+  --shadow-sm: 0 2px 8px -2px rgba(28, 24, 21, 0.05), 0 4px 16px -4px rgba(28, 24, 21, 0.02);
+  --shadow-md: 0 4px 12px -2px rgba(28, 24, 21, 0.08), 0 8px 24px -4px rgba(28, 24, 21, 0.04);
+  --shadow-lg: 0 12px 32px -4px rgba(28, 24, 21, 0.1), 0 24px 64px -8px rgba(28, 24, 21, 0.06);
+  --shadow-glow: 0 0 24px rgba(13, 131, 121, 0.2);
 }
 
 * { box-sizing: border-box; }
 html, body, #root { height: 100%; margin: 0; }
 
 body {
-  font-family: "Hanken Grotesk", system-ui, sans-serif;
+  font-family: "Hanken Grotesk", system-ui, -apple-system, sans-serif;
   color: var(--ink);
   background: var(--paper);
+  background-image: radial-gradient(circle at 50% 0%, #ffffff 0%, transparent 100%);
+  background-attachment: fixed;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
+/* Typography refinements */
 .serif { font-family: "Fraunces", Georgia, serif; }
 .mono { font-family: "Space Mono", ui-monospace, monospace; }
 
 .eyebrow {
   font-family: "Space Mono", monospace;
   font-size: 11px;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--ink-soft);
+  font-weight: 700;
 }
 
 button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
-input, textarea { font-family: inherit; }
-::selection { background: var(--saffron-soft); }
+input, textarea { font-family: inherit; transition: all 0.2s ease; }
+::selection { background: var(--saffron-soft); color: var(--ink); }
 
-.tap { transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.15s ease, border-color 0.15s ease; }
-.tap:active { transform: scale(0.97); }
+/* Interactive elements */
+.tap { transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease; }
+.tap:hover { transform: translateY(-1px); }
+.tap:active { transform: scale(0.96) translateY(1px); }
+
 button:focus-visible, input:focus-visible, textarea:focus-visible, [tabindex]:focus-visible {
-  outline: 2.5px solid var(--saffron);
-  outline-offset: 2px;
-  border-radius: 6px;
+  outline: 3px solid var(--saffron);
+  outline-offset: 3px;
+  border-radius: 8px;
 }
 
-.card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; }
+/* Premium Cards */
+.card { 
+  background: var(--card); 
+  border: 1px solid var(--line); 
+  border-radius: 20px; 
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+}
+.card:hover {
+  box-shadow: var(--shadow-md);
+}
 
-.flip { transform-style: preserve-3d; transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
+/* Glassmorphism Classes */
+.glass-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(251, 246, 236, 0.7);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border-bottom: 1px solid rgba(227, 217, 199, 0.5);
+}
+
+.glass-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  background: rgba(251, 246, 236, 0.85);
+  backdrop-filter: blur(20px) saturate(200%);
+  -webkit-backdrop-filter: blur(20px) saturate(200%);
+  border-top: 1px solid rgba(227, 217, 199, 0.6);
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.03);
+}
+
+/* Specific Component Enhancements */
+.block-btn:hover {
+  border-color: var(--teal-tint);
+}
+.speaker-btn:hover {
+  background: var(--teal-tint);
+}
+.primary-btn {
+  box-shadow: var(--shadow-sm);
+}
+.primary-btn:hover {
+  box-shadow: var(--shadow-glow);
+}
+
+/* 3D Flip Cards */
+.flip { transform-style: preserve-3d; transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
 .flip.is-back { transform: rotateY(180deg); }
 .face { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
 .face-back { transform: rotateY(180deg); }
 
-@keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-.rise { animation: rise 0.35s ease both; }
+/* Animations */
+@keyframes rise { 
+  0% { opacity: 0; transform: translateY(12px) scale(0.98); } 
+  100% { opacity: 1; transform: translateY(0) scale(1); } 
+}
+.rise { animation: rise 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+
 @keyframes spin { to { transform: rotate(360deg); } }
 .spin { animation: spin 1s linear infinite; }
 
-.scroll::-webkit-scrollbar { width: 6px; }
-.scroll::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
+/* Scrollbars */
+.scroll::-webkit-scrollbar { width: 8px; }
+.scroll::-webkit-scrollbar-track { background: transparent; }
+.scroll::-webkit-scrollbar-thumb { background: var(--line); border-radius: 4px; border: 2px solid var(--paper); }
+.scroll::-webkit-scrollbar-thumb:hover { background: var(--ink-faint); }
+
+/* Charla chat bubble container */
+.charla-container .scroll {
+  scroll-behavior: smooth;
+}
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
