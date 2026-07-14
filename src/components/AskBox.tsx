@@ -3,22 +3,21 @@ import { Sparkles, Loader2 } from "lucide-react";
 import { askTutor, GeminiError } from "../lib/gemini";
 import { useStore } from "../store/useStore";
 
-export default function AskBox({ onOpenSettings }: { onOpenSettings: () => void }) {
-  const { apiKey, model } = useStore();
+export default function AskBox() {
+  const { model } = useStore();
   const [q, setQ] = useState("");
   const [a, setA] = useState("");
   const [loading, setLoading] = useState(false);
 
   const ask = async () => {
     if (!q.trim() || loading) return;
-    if (!apiKey) { onOpenSettings?.(); return; }
     setLoading(true); setA("");
     try {
-      const r = await askTutor(q.trim(), { key: apiKey, model });
+      const r = await askTutor(q.trim(), { model });
       setA(r);
     } catch (e) {
       const code = e instanceof GeminiError ? e.code : "";
-      setA(code === "BAD_KEY" ? "That API key looks invalid — check Settings." : "Connection error — try again.");
+      setA(code === "BAD_KEY" ? "The backend API key is invalid." : "Connection error — try again.");
     }
     setLoading(false);
   };

@@ -7,15 +7,14 @@ import { useStore } from "../store/useStore";
 
 function friendlyError(e: unknown) {
   const code = e instanceof GeminiError ? e.code : "UNKNOWN";
-  if (code === "NO_KEY") return "Add your Gemini API key in Settings to chat with Lucía.";
-  if (code === "BAD_KEY") return "That API key looks invalid. Check it in Settings.";
+  if (code === "BAD_KEY") return "The backend API key is invalid.";
   if (code === "RATE_LIMIT") return "Gemini is rate-limiting. Wait a moment and try again.";
-  if (code === "NETWORK") return "Couldn't reach Gemini — check your connection.";
+  if (code === "NETWORK") return "Couldn't reach the server — check your connection or start the backend.";
   return "Something went wrong. Try again.";
 }
 
-export default function Charla({ seedVocab, onFirstReply, onOpenSettings }: { seedVocab: any[]; onFirstReply?: () => void; onOpenSettings: () => void }) {
-  const { apiKey, model } = useStore();
+export default function Charla({ seedVocab, onFirstReply }: { seedVocab: any[]; onFirstReply?: () => void }) {
+  const { model } = useStore();
   const [msgs, setMsgs] = useState<{ role: "user" | "assistant"; content: string }[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -38,7 +37,7 @@ export default function Charla({ seedVocab, onFirstReply, onOpenSettings }: { se
   const start = async () => {
     setStarted(true); setLoading(true); setErr("");
     try {
-      const opener = await tutorOpener(seedVocab.map((v) => v.es), { key: apiKey, model });
+      const opener = await tutorOpener(seedVocab.map((v) => v.es), { model });
       setMsgs([{ role: "assistant", content: opener }]);
     } catch (e) {
       setErr(friendlyError(e));
@@ -53,7 +52,7 @@ export default function Charla({ seedVocab, onFirstReply, onOpenSettings }: { se
     const next: { role: "user" | "assistant"; content: string }[] = [...msgs, { role: "user", content: text }];
     setMsgs(next); setInput(""); setLoading(true); setErr("");
     try {
-      const reply = await tutorReply(next, { key: apiKey, model });
+      const reply = await tutorReply(next, { model });
       setMsgs([...next, { role: "assistant", content: reply }]);
       onFirstReply?.();
     } catch (e) {
@@ -106,15 +105,9 @@ export default function Charla({ seedVocab, onFirstReply, onOpenSettings }: { se
         <p style={{ color: "var(--ink-soft)", fontSize: 14.5, lineHeight: 1.55, margin: "0 0 18px" }}>
           Your AI tutor. Write in Spanish — short is fine. She replies simply, fixes mistakes with ✏️, and keeps the chat going. This is the part that makes you <em>conversational</em>.
         </p>
-        {!apiKey ? (
-          <button className="tap" onClick={onOpenSettings} style={{ padding: "13px 22px", background: "var(--ink)", color: "#fff", borderRadius: 13, fontWeight: 700, fontSize: 15, display: "inline-flex", alignItems: "center", gap: 8 }}>
-            <SettingsIcon size={17} /> Add your Gemini key
-          </button>
-        ) : (
-          <button className="tap" onClick={start} style={{ padding: "13px 26px", background: "var(--coral)", color: "#fff", borderRadius: 13, fontWeight: 700, fontSize: 15 }}>
-            Start talking
-          </button>
-        )}
+        <button className="tap" onClick={start} style={{ padding: "13px 26px", background: "var(--coral)", color: "#fff", borderRadius: 13, fontWeight: 700, fontSize: 15 }}>
+          Start talking
+        </button>
       </div>
     );
   }

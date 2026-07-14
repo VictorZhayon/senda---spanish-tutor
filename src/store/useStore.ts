@@ -33,14 +33,12 @@ interface SendaState {
   srs: Record<string, any>; // Will type correctly after SRS TS conversion
   day: DaySession;
   genLessons: any[]; // Generated lessons
-  apiKey: string;
   model: string;
 
   // Actions
   setTab: (tab: string) => void;
   setView: (view: string | null) => void;
   setActiveLessonId: (id: string | null) => void;
-  setApiKey: (key: string) => void;
   setModel: (model: string) => void;
   bumpStreak: () => void;
   finishBlock: (name: keyof Omit<DaySession, 'date'>, xp?: number) => void;
@@ -62,14 +60,12 @@ export const useStore = create<SendaState>()(
       srs: {},
       day: freshDay(),
       genLessons: [],
-      apiKey: '',
       model: DEFAULT_MODEL,
 
       // Actions
       setTab: (tab) => set({ tab }),
       setView: (view) => set({ view }),
       setActiveLessonId: (activeLessonId) => set({ activeLessonId }),
-      setApiKey: (apiKey) => set({ apiKey }),
       setModel: (model) => set({ model }),
 
       bumpStreak: () => {
@@ -141,7 +137,6 @@ export const useStore = create<SendaState>()(
         srs: state.srs,
         day: state.day?.date === todayKey() ? state.day : freshDay(),
         genLessons: state.genLessons,
-        apiKey: state.apiKey,
         model: state.model
       }),
     }

@@ -21,7 +21,7 @@ import Settings from "./components/Settings";
 export default function App() {
   const {
     tab, view, setTab, setView, activeLessonId, setActiveLessonId,
-    progress, srs, day, genLessons, apiKey, model,
+    progress, srs, day, genLessons, model,
     finishBlock, gradeCard, completeLesson, addGenLesson
   } = useStore();
 
@@ -53,10 +53,9 @@ export default function App() {
   }, [progress.completed, allLessons, nextLesson]);
 
   async function makePracticeLesson() {
-    if (!apiKey) { setShowSettings(true); return; }
     setGenerating(true); setGenError("");
     try {
-      const data = await generatePracticeLesson(knownWords, { key: apiKey, model });
+      const data = await generatePracticeLesson(knownWords, { model });
       const lesson = {
         id: "gen-" + (genLessons.length + 1),
         week: 0, level: "Extra", title: data.title || "Práctica",
@@ -91,7 +90,7 @@ export default function App() {
             : <CourseComplete generating={generating} genError={genError} onGenerate={makePracticeLesson} />
         )}
         {view === "hablar" && (
-          <Charla seedVocab={lastDoneVocab} onFirstReply={() => { if (!day.hablar) finishBlock("hablar"); }} onOpenSettings={() => setShowSettings(true)} />
+          <Charla seedVocab={lastDoneVocab} onFirstReply={() => { if (!day.hablar) finishBlock("hablar"); }} />
         )}
         {showSettings && <Settings onClose={() => setShowSettings(false)} />}
       </Shell>
@@ -123,7 +122,7 @@ export default function App() {
             done={day.hablar} tone="coral" icon={<MessageCircle size={21} />} onClick={() => setView("hablar")} />
 
           <div style={{ marginTop: 22 }}>
-            <AskBox onOpenSettings={() => setShowSettings(true)} />
+            <AskBox />
           </div>
         </div>
       )}
@@ -150,7 +149,7 @@ export default function App() {
             <div className="eyebrow" style={{ marginBottom: 6 }}>Dialect</div>
             <p style={{ fontSize: 14, lineHeight: 1.6, margin: 0, color: "var(--teal-deep)" }}>{REFERENCE.tip}</p>
           </div>
-          <AskBox onOpenSettings={() => setShowSettings(true)} />
+          <AskBox />
         </div>
       )}
 

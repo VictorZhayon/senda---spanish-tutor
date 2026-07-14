@@ -5,11 +5,17 @@
   "type": "module",
   "description": "Senda — a frequency-first Spanish course (A1 → B1) with an AI tutor. PWA, bring-your-own Gemini key.",
   "scripts": {
-    "dev": "vite",
+    "server": "node server.js",
+    "vite": "vite",
+    "dev": "concurrently \"npm run server\" \"npm run vite\"",
     "build": "vite build",
-    "preview": "vite preview --host"
+    "preview": "concurrently \"npm run server\" \"vite preview --host\""
   },
   "dependencies": {
+    "concurrently": "^10.0.3",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
     "lucide-react": "^0.460.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"

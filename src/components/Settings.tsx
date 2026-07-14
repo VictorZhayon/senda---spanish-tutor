@@ -10,13 +10,11 @@ const MODELS = [
 ];
 
 export default function Settings({ onClose }: { onClose: () => void }) {
-  const { apiKey, model, setApiKey, setModel } = useStore();
-  const [draft, setDraft] = useState(apiKey || "");
+  const { model, setModel } = useStore();
   const [mdl, setMdl] = useState(model || DEFAULT_MODEL);
   const [saved, setSaved] = useState(false);
 
   const save = () => {
-    setApiKey(draft.trim());
     setModel(mdl);
     setSaved(true);
     setTimeout(() => setSaved(false), 1400);
@@ -33,19 +31,7 @@ export default function Settings({ onClose }: { onClose: () => void }) {
           <button className="tap" onClick={onClose} aria-label="Close" style={{ padding: 6 }}><X size={22} /></button>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 7, margin: "16px 0 6px" }}>
-          <Key size={16} color="var(--teal)" />
-          <span className="eyebrow">Gemini API key</span>
-        </div>
-        <input value={draft} onChange={(e) => setDraft(e.target.value)} type="password" placeholder="AIza…" aria-label="Gemini API key"
-          style={{ width: "100%", border: "1px solid var(--line)", borderRadius: 11, padding: "12px 13px", fontSize: 15, background: "var(--card)", outline: "none" }} />
 
-        <p style={{ fontSize: 12.5, color: "var(--ink-soft)", lineHeight: 1.55, margin: "10px 0 0" }}>
-          Your key is stored <strong>only in this browser</strong> (localStorage) and sent directly to Google — it never touches any other server. Get a free key at{" "}
-          <a href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer" style={{ color: "var(--teal)", fontWeight: 600, textDecoration: "none" }}>
-            Google AI Studio <ExternalLink size={11} style={{ verticalAlign: "middle" }} />
-          </a>.
-        </p>
 
         <div style={{ margin: "18px 0 6px" }}><span className="eyebrow">Model</span></div>
         <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
@@ -63,12 +49,7 @@ export default function Settings({ onClose }: { onClose: () => void }) {
           {saved ? <><Check size={18} /> Saved</> : "Save"}
         </button>
 
-        {apiKey && (
-          <button className="tap" onClick={() => { setDraft(""); setApiKey(""); }}
-            style={{ width: "100%", marginTop: 9, padding: 11, background: "transparent", color: "var(--coral)", borderRadius: 11, fontWeight: 600, fontSize: 13.5, display: "flex", alignItems: "center", justifyContent: "center", gap: 7 }}>
-            <Trash2 size={15} /> Remove key from this device
-          </button>
-        )}
+
       </div>
     </div>
   );

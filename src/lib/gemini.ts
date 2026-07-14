@@ -3,11 +3,8 @@
 //
 // Endpoint reference (June 2026):
 //   POST https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent
-//   header: x-goog-api-key: <KEY>
-// Roles in `contents` are "user" and "model" (not "assistant").
-
-const ENDPOINT = (model: string) =>
-  `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+// We now use a backend proxy at /api/gemini for security.
+const ENDPOINT = "/api/gemini";
 
 export const DEFAULT_MODEL = "gemini-2.5-flash";
 
@@ -38,7 +35,6 @@ function toContents(history: Message[]) {
 }
 
 interface GenerateOpts {
-  key: string;
   model?: string;
   system?: string;
   history?: Message[];
@@ -47,37 +43,34 @@ interface GenerateOpts {
 }
 
 export async function geminiGenerate({
-  key,
   model = DEFAULT_MODEL,
   system,
   history = [],
   maxTokens = 1024,
   temperature = 0.7,
-}: GenerateOpts) {
-  if (!key) throw new GeminiError("NO_KEY", "No API key set.");
+}: GenerateOpts = {}) {
 
   const generationConfig: any = { temperature, maxOutputTokens: maxTokens };
   // thinkingConfig is valid for 2.5-series; skip it for other models.
   if (model.includes("2.5")) generationConfig.thinkingConfig = { thinkingBudget: 0 };
 
-  const body: any = { contents: toContents(history), generationConfig };
+  const body: any = { model, contents: toContents(history), generationConfig };
   if (system) body.systemInstruction = { parts: [{ text: system }] };
 
   let res;
   try {
-    res = await fetch(ENDPOINT(model), {
+    res = await fetch(ENDPOINT, {
       method: "POST",
-      headers: { "Content-Type": "application/json", "x-goog-api-key": key },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
   } catch {
-    throw new GeminiError("NETWORK", "Could not reach Gemini. Check your connection.");
+    throw new GeminiError("NETWORK", "Could not reach the server. Check your connection.");
   }
 
   if (!res.ok) {
-    if (res.status === 400 || res.status === 403) throw new GeminiError("BAD_KEY", "API key looks invalid or lacks access.");
-    if (res.status === 429) throw new GeminiError("RATE_LIMIT", "Rate limit reached. Wait a moment and retry.");
-    throw new GeminiError("HTTP_" + res.status, "Gemini returned an error (" + res.status + ").");
+    if (res.status === 500) throw new GeminiError("BAD_KEY", "Backend missing valid API key.");
+    throw new GeminiError("HTTP_" + res.status, "Server returned an error (" + res.status + ").");
   }
 
   const data = await res.json();
