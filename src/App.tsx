@@ -280,9 +280,12 @@ function Shell({ children, onSettings }: { children: React.ReactNode, onSettings
     <div style={{ minHeight: "100%", display: "flex", flexDirection: "column", background: "var(--paper)" }}>
       <header className="glass-header">
         <div style={{ maxWidth: 620, margin: "0 auto", padding: "12px 18px calc(12px + env(safe-area-inset-top))", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-            <span className="serif" style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-.02em" }}>Senda</span>
-            <span className="mono" style={{ fontSize: 9.5, color: "var(--ink-faint)", letterSpacing: ".1em" }}>ES · A1–B1</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <img src="/logo.png" alt="" style={{ width: 26, height: 26, borderRadius: 8, boxShadow: "var(--shadow-sm)" }} />
+            <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+              <span className="serif" style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-.02em" }}>Senda</span>
+              <span className="mono" style={{ fontSize: 9.5, color: "var(--ink-faint)", letterSpacing: ".1em" }}>ES · A1–B1</span>
+            </div>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
             <span style={{ display: "inline-flex", alignItems: "center", gap: 4, color: progress.streak ? "var(--coral)" : "var(--ink-faint)" }} title="Day streak">

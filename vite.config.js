@@ -21,7 +21,7 @@ export default defineConfig({
     VitePWA({
       registerType: "autoUpdate",
       injectRegister: "auto",
-      includeAssets: ["icons/apple-touch-icon.png", "robots.txt"],
+      includeAssets: ["logo.png", "robots.txt"],
       manifest: {
         name: "Senda — Spanish",
         short_name: "Senda",
@@ -35,9 +35,9 @@ export default defineConfig({
         categories: ["education"],
         lang: "en",
         icons: [
-          { src: "icons/icon-192.png", sizes: "192x192", type: "image/png" },
-          { src: "icons/icon-512.png", sizes: "512x512", type: "image/png" },
-          { src: "icons/maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
+          { src: "logo.png", sizes: "192x192", type: "image/png" },
+          { src: "logo.png", sizes: "512x512", type: "image/png" },
+          { src: "logo.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
         ],
       },
       workbox: {
