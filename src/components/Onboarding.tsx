@@ -14,11 +14,10 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
         
         <div className="rise" style={{ textAlign: "center", marginBottom: 48 }}>
           <div style={{
-            width: 80, height: 80, background: "var(--card)", border: "1px solid var(--line)", 
-            borderRadius: 24, margin: "0 auto 24px", display: "flex", alignItems: "center", justifyContent: "center",
-            boxShadow: "var(--shadow-md)"
+            width: 80, height: 80, margin: "0 auto 24px", display: "flex", alignItems: "center", justifyContent: "center",
+            boxShadow: "var(--shadow-md)", borderRadius: 24, overflow: "hidden"
           }}>
-            <span className="serif" style={{ fontSize: 42, color: "var(--saffron)", fontWeight: 700, letterSpacing: "-.04em" }}>S</span>
+            <img src="/logo.png" alt="Senda Logo" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           </div>
           <h1 className="serif" style={{ fontSize: 36, fontWeight: 700, margin: "0 0 12px", letterSpacing: "-.02em" }}>Welcome to Senda</h1>
           <p style={{ fontSize: 16, color: "var(--ink-soft)", lineHeight: 1.5, margin: 0 }}>
