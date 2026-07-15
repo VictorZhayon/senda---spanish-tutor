@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { MessageCircle, Send, Loader2, Settings as SettingsIcon, Mic, MicOff } from "lucide-react";
 import { Speaker } from "./ui";
 import { tutorReply, tutorOpener, GeminiError } from "../lib/gemini";
-import { cleanForSpeech, listen } from "../lib/speech";
+import { cleanForSpeech, listen, speak } from "../lib/speech";
 import { useStore } from "../store/useStore";
 
 function friendlyError(e: unknown) {
@@ -39,9 +39,12 @@ export default function Charla({ seedVocab, onFirstReply }: { seedVocab: any[]; 
     try {
       const opener = await tutorOpener(seedVocab.map((v) => v.es), { model });
       setMsgs([{ role: "assistant", content: opener }]);
+      speak(cleanForSpeech(opener));
     } catch (e) {
       setErr(friendlyError(e));
-      setMsgs([{ role: "assistant", content: "¡Hola! ¿Cómo estás hoy? (How are you today?)" }]);
+      const fallback = "¡Hola! ¿Cómo estás hoy? (How are you today?)";
+      setMsgs([{ role: "assistant", content: fallback }]);
+      speak(cleanForSpeech(fallback));
     }
     setLoading(false);
   };
@@ -54,6 +57,7 @@ export default function Charla({ seedVocab, onFirstReply }: { seedVocab: any[]; 
     try {
       const reply = await tutorReply(next, { model });
       setMsgs([...next, { role: "assistant", content: reply }]);
+      speak(cleanForSpeech(reply));
       onFirstReply?.();
     } catch (e) {
       setErr(friendlyError(e));

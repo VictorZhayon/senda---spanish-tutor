@@ -1,71 +1,70 @@
 # Senda
 
-A frequency-first Spanish course (**A1 → B1**) with an AI tutor, built as an installable, offline-capable PWA. Neutral **Latin American Spanish** (tú / ustedes, no vosotros, seseo).
+Senda is a modern, frequency-first Spanish learning application that takes you from A1 to B1 level fluency. It combines structured vocabulary lessons, a Spaced Repetition System (SRS), and an interactive AI tutor named "Lucía" for hands-free conversational practice. 
 
-The whole thing runs in the browser with **no backend**. The AI tutor uses your **own Gemini API key**, stored only on your device.
+Senda is built as a Progressive Web App (PWA) with a premium glassmorphism UI, a secure local backend proxy, and cross-device cloud sync.
 
-## The daily ritual
+## 🚀 Features
 
-Each day is three short blocks — about 15 minutes total:
+- **Structured Curriculum (A1 → B1)**: 40 hand-crafted lessons introducing the highest-frequency Spanish vocabulary.
+- **Spaced Repetition System (SRS)**: Smart flashcard reviews based on your performance, ensuring you never forget what you've learned.
+- **Hands-Free Conversation (Speech-to-Text)**: Practice real conversational Spanish by speaking directly to Lucía using the Web Speech API. She talks back via Text-to-Speech (TTS).
+- **Infinite AI Lessons**: Automatically generate new, dynamic practice lessons tailored entirely around the vocabulary you have already unlocked.
+- **Ask Lucía**: Stuck on grammar? A dedicated Q&A box lets you ask questions in English to get clear, contextual explanations of Spanish concepts.
+- **Firebase Cloud Sync**: Authenticate with Google to automatically sync your XP, streaks, and flashcard schedules across all your devices.
+- **Premium Aesthetics**: Features a sleek, heavily customized glassmorphism design with a fully supported Dark Mode.
 
-- **Repasar** — spaced-repetition flashcard review (an SM-2 variant). The deck fills as you complete lessons.
-- **Aprender** — one lesson: a short explainer + grammar table + six vocab cards with audio.
-- **Hablar** — a conversation with *Lucía*, the AI tutor. She replies in simple Spanish, corrects mistakes with a `✏️` line, and always asks a follow-up question.
+## 🛠️ Tech Stack
 
-Plus **Ask Lucía** for one-off grammar questions, and a **Reference** tab for pronunciation.
+### Frontend
+- **Framework**: React 18 & Vite
+- **Language**: TypeScript (strict type-checking)
+- **State Management**: Zustand (with localStorage persistence + Firebase Hydration)
+- **Styling**: Vanilla CSS (CSS Variables, Flexbox, Keyframe Animations)
+- **Icons**: Lucide React
+- **PWA**: `vite-plugin-pwa` for offline capabilities and installation.
 
-## Curriculum
+### Backend & Cloud
+- **Backend Proxy**: Express.js (Node.js) server running concurrently to securely proxy Gemini API requests.
+- **AI Engine**: Google Generative AI (`gemini-2.5-flash`).
+- **Database & Auth**: Firebase (Auth & Firestore) for cross-device syncing.
 
-40 lessons: **A1** (1–8), **A2** (9–20), **B1** (21–40), covering everything from the five vowel sounds up through the subjunctive, the past tenses in contrast, por/para, and narrative storytelling. When you finish, the app generates fresh AI practice lessons on demand.
+## 💻 Local Development Setup
 
-> **Honest pacing:** at ~15 min/day, 40 lessons is a year-plus of material, and B1 is something to *grow into*, not finish in three months. The app is built to make each minute count — daily review + real conversation — rather than to promise fast fluency.
+To run Senda locally, you will need [Node.js](https://nodejs.org/) installed on your machine.
 
-## Setup
-
+### 1. Install Dependencies
 ```bash
 npm install
-npm run dev      # local dev server
-npm run build    # production build → dist/
-npm run preview  # preview the production build
 ```
 
-Node 18+ recommended.
+### 2. Configure Environment Variables
+You need API keys for both Google Gemini and Firebase. 
+Create a `.env` file in the root directory (you can copy `.env.example` as a starting point) and add the following keys:
 
-## Bring your own Gemini key
+```env
+# Gemini API Key (Required for AI interactions)
+GEMINI_API_KEY=your_gemini_api_key_here
 
-1. Get a free key at **[Google AI Studio](https://aistudio.google.com/apikey)**.
-2. Open the app → **Settings** (gear, top right) → paste the key → **Save**.
-3. The key is stored in your browser's `localStorage` and sent **directly to Google** — it never touches any other server. Remove it anytime from Settings.
+# Firebase Config (Required for Cloud Sync)
+VITE_FIREBASE_API_KEY=your_firebase_api_key
+VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your_project_id
+VITE_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+VITE_FIREBASE_APP_ID=your_app_id
+```
 
-Default model is `gemini-2.5-flash` (fast and cheap); you can switch models in Settings.
+### 3. Start the Application
+We use `concurrently` to run both the Vite frontend client and the Express backend proxy simultaneously.
 
-## Deploy
-
-The build is host-agnostic. The only knob is the base path, via the `VITE_BASE` env var.
-
-**Netlify / Vercel / custom domain / GitHub user-org pages** — no config needed:
 ```bash
-npm run build      # base defaults to "/"
+npm run dev
 ```
 
-**GitHub Pages project site** (served from `/<repo>/`):
-```bash
-VITE_BASE=/senda/ npm run build
-# then publish the dist/ folder (e.g. with the gh-pages package or Actions)
-```
+The frontend will be available at `http://localhost:5173` and the backend proxy at `http://localhost:3001`.
 
-Any static host works — just serve the `dist/` folder.
+## ⚙️ How the Architecture Works
 
-## PWA / offline
-
-- Installable (Add to Home Screen) on mobile and desktop.
-- The app shell, lessons, and reference work fully **offline**.
-- The AI tutor (Repasar and the rest work offline; **Hablar** and **Ask Lucía** need a connection, since they call Gemini).
-
-## Tech
-
-Vite · React 18 · vite-plugin-pwa (Workbox) · lucide-react · the Web Speech API for audio · the Gemini Generative Language API. No tracking, no analytics, no accounts.
-
-## License
-
-MIT — see [LICENSE](./LICENSE).
+- **Secure AI Proxy**: Senda does not expose your `GEMINI_API_KEY` to the browser. Instead, the React frontend sends queries to `POST /api/gemini` which hits the local `server.js` Express app. The Express app injects the API key securely and forwards the request to Google. Vite handles proxying `/api` to the backend during development.
+- **Zustand + Firebase**: All progress is managed synchronously in the browser memory by `useStore.ts` for a highly responsive UI. In the background, `App.tsx` debounces these changes and saves the user's state to a Firestore document (`users/{uid}`). Upon login, the app fetches the Firestore document and rehydrates the Zustand store.
