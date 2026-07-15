@@ -18,17 +18,19 @@ import Lesson from "./components/Lesson";
 import Charla from "./components/Charla";
 import AskBox from "./components/AskBox";
 import Settings from "./components/Settings";
+import Onboarding from "./components/Onboarding";
 
 export default function App() {
   const {
     tab, view, setTab, setView, activeLessonId, setActiveLessonId,
     progress, srs, day, genLessons, model, theme, user, setUser, syncFromCloud,
-    finishBlock, gradeCard, completeLesson, addGenLesson
+    finishBlock, gradeCard, completeLesson, addGenLesson, onboarded, completeOnboarding
   } = useStore();
 
   const [showSettings, setShowSettings] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [genError, setGenError] = useState("");
+  const [authInitialized, setAuthInitialized] = useState(false);
 
   // Sync theme to body class
   useEffect(() => {
@@ -38,13 +40,17 @@ export default function App() {
 
   // Listen to Auth State
   useEffect(() => {
-    if (!auth) return;
+    if (!auth) {
+      setAuthInitialized(true);
+      return;
+    }
     const unsub = auth.onAuthStateChanged(async (u) => {
       setUser(u);
       if (u) {
         const data = await loadUserData(u.uid);
         if (data) syncFromCloud(data);
       }
+      setAuthInitialized(true);
     });
     return unsub;
   }, [setUser, syncFromCloud]);
@@ -102,6 +108,18 @@ export default function App() {
 
   const blocksDone = [day.repasar, day.aprender, day.hablar].filter(Boolean).length;
   const viewLesson = activeLessonId ? allLessons.find((l) => l.id === activeLessonId) : nextLesson;
+
+  if (!authInitialized) {
+    return (
+      <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--paper)" }}>
+        <Loader2 size={32} className="spin" style={{ color: "var(--teal)" }} />
+      </div>
+    );
+  }
+
+  if (!onboarded) {
+    return <Onboarding onComplete={completeOnboarding} />;
+  }
 
   if (view) {
     const back = () => { setView(null); setActiveLessonId(null); };

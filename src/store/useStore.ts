@@ -37,6 +37,7 @@ interface SendaState {
   model: string;
   theme: 'light' | 'dark' | 'system';
   user: User | null;
+  onboarded: boolean;
 
   // Actions
   setTab: (tab: string) => void;
@@ -52,6 +53,7 @@ interface SendaState {
   setUser: (user: User | null) => void;
   syncFromCloud: (data: any) => void;
   resetProgress: () => void;
+  completeOnboarding: () => void;
 }
 
 export const useStore = create<SendaState>()(
@@ -70,6 +72,7 @@ export const useStore = create<SendaState>()(
       model: DEFAULT_MODEL,
       theme: 'system',
       user: null,
+      onboarded: false,
 
       // Actions
       setTab: (tab) => set({ tab }),
@@ -84,7 +87,8 @@ export const useStore = create<SendaState>()(
         day: data.day?.date === todayKey() ? data.day : freshDay(),
         genLessons: data.genLessons || state.genLessons,
         model: data.model || state.model,
-        theme: data.theme || state.theme
+        theme: data.theme || state.theme,
+        onboarded: data.onboarded ?? state.onboarded,
       })),
       resetProgress: () => set({
         progress: { xp: 0, streak: 0, lastDay: null, completed: [] },
@@ -92,6 +96,8 @@ export const useStore = create<SendaState>()(
         day: freshDay(),
         genLessons: [],
       }),
+
+      completeOnboarding: () => set({ onboarded: true }),
 
       bumpStreak: () => {
         const { progress } = get();
@@ -163,7 +169,8 @@ export const useStore = create<SendaState>()(
         day: state.day?.date === todayKey() ? state.day : freshDay(),
         genLessons: state.genLessons,
         model: state.model,
-        theme: state.theme
+        theme: state.theme,
+        onboarded: state.onboarded
       }),
     }
   )
