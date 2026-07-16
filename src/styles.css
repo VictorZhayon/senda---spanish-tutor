@@ -55,6 +55,9 @@ body.dark {
   --ink: #f0ebe4;
   --ink-soft: #a8a49c;
   --ink-faint: #6e6b66;
+  --teal: #2dd4bf;
+  --teal-deep: #99f6e4;
+  --teal-tint: rgba(45, 212, 191, 0.15);
   --glass-bg: rgba(18, 17, 16, 0.7);
   --glass-nav-bg: rgba(18, 17, 16, 0.85);
   --glass-border: rgba(51, 49, 48, 0.6);

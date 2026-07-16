@@ -1,6 +1,8 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
 
 dotenv.config();
 
@@ -42,6 +44,17 @@ app.post("/api/gemini", async (req, res) => {
     console.error("Gemini API Error:", error);
     res.status(500).json({ error: "Failed to communicate with Gemini API." });
   }
+});
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Serve static files from the React app
+app.use(express.static(path.join(__dirname, "dist")));
+
+// Catch-all handler for any request that doesn't match the API routes
+app.get(/^.*$/, (req, res) => {
+  res.sendFile(path.join(__dirname, "dist", "index.html"));
 });
 
 app.listen(PORT, () => {

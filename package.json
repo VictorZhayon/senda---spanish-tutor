@@ -5,6 +5,7 @@
   "type": "module",
   "description": "Senda — a frequency-first Spanish course (A1 → B1) with an AI tutor. PWA, bring-your-own Gemini key.",
   "scripts": {
+    "start": "node server.js",
     "server": "node server.js",
     "vite": "vite",
     "dev": "concurrently \"npm run server\" \"npm run vite\"",
