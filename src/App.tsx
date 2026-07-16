@@ -283,7 +283,7 @@ function Shell({ children, onSettings }: { children: React.ReactNode, onSettings
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <img src="/logo.png" alt="" style={{ width: 26, height: 26, borderRadius: 8, boxShadow: "var(--shadow-sm)" }} />
             <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-              <span className="serif" style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-.02em" }}>Senda</span>
+              <span className="serif" style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-.02em" }}>Holita</span>
               <span className="mono" style={{ fontSize: 9.5, color: "var(--ink-faint)", letterSpacing: ".1em" }}>ES · A1–B1</span>
             </div>
           </div>

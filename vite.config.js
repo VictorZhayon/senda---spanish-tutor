@@ -2,7 +2,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 
-// Base path: set VITE_BASE for GitHub Pages project sites, e.g. VITE_BASE=/senda/
+// Base path: set VITE_BASE for GitHub Pages project sites, e.g. VITE_BASE=/holita/
 // Netlify / Vercel / custom domains can leave it as "/".
 const base = process.env.VITE_BASE || "/";
 
@@ -23,8 +23,8 @@ export default defineConfig({
       injectRegister: "auto",
       includeAssets: ["logo.png", "robots.txt"],
       manifest: {
-        name: "Senda — Spanish",
-        short_name: "Senda",
+        name: "Holita — Spanish",
+        short_name: "Holita",
         description: "A frequency-first Spanish course (A1 → B1) with an AI tutor.",
         theme_color: "#0F6E66",
         background_color: "#FBF6EC",

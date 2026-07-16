@@ -1,8 +1,8 @@
-# Senda
+# Holita
 
-Senda is a modern, frequency-first Spanish learning application that takes you from A1 to B1 level fluency. It combines structured vocabulary lessons, a Spaced Repetition System (SRS), and an interactive AI tutor named "Lucía" for hands-free conversational practice. 
+Holita is a modern, frequency-first Spanish learning application that takes you from A1 to B1 level fluency. It combines structured vocabulary lessons, a Spaced Repetition System (SRS), and an interactive AI tutor named "Lucía" for hands-free conversational practice. 
 
-Senda is built as a Progressive Web App (PWA) with a premium glassmorphism UI, a secure local backend proxy, and cross-device cloud sync.
+Holita is built as a Progressive Web App (PWA) with a premium glassmorphism UI, a secure local backend proxy, and cross-device cloud sync.
 
 ## 🚀 Features
 
@@ -31,7 +31,7 @@ Senda is built as a Progressive Web App (PWA) with a premium glassmorphism UI, a
 
 ## 💻 Local Development Setup
 
-To run Senda locally, you will need [Node.js](https://nodejs.org/) installed on your machine.
+To run Holita locally, you will need [Node.js](https://nodejs.org/) installed on your machine.
 
 ### 1. Install Dependencies
 ```bash
@@ -66,5 +66,5 @@ The frontend will be available at `http://localhost:5173` and the backend proxy 
 
 ## ⚙️ How the Architecture Works
 
-- **Secure AI Proxy**: Senda does not expose your `GEMINI_API_KEY` to the browser. Instead, the React frontend sends queries to `POST /api/gemini` which hits the local `server.js` Express app. The Express app injects the API key securely and forwards the request to Google. Vite handles proxying `/api` to the backend during development.
+- **Secure AI Proxy**: Holita does not expose your `GEMINI_API_KEY` to the browser. Instead, the React frontend sends queries to `POST /api/gemini` which hits the local `server.js` Express app. The Express app injects the API key securely and forwards the request to Google. Vite handles proxying `/api` to the backend during development.
 - **Zustand + Firebase**: All progress is managed synchronously in the browser memory by `useStore.ts` for a highly responsive UI. In the background, `App.tsx` debounces these changes and saves the user's state to a Firestore document (`users/{uid}`). Upon login, the app fetches the Firestore document and rehydrates the Zustand store.

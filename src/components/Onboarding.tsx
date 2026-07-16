@@ -17,9 +17,9 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
             width: 80, height: 80, margin: "0 auto 24px", display: "flex", alignItems: "center", justifyContent: "center",
             boxShadow: "var(--shadow-md)", borderRadius: 24, overflow: "hidden"
           }}>
-            <img src="/logo.png" alt="Senda Logo" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            <img src="/logo.png" alt="Holita Logo" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           </div>
-          <h1 className="serif" style={{ fontSize: 36, fontWeight: 700, margin: "0 0 12px", letterSpacing: "-.02em" }}>Welcome to Senda</h1>
+          <h1 className="serif" style={{ fontSize: 36, fontWeight: 700, margin: "0 0 12px", letterSpacing: "-.02em" }}>Welcome to Holita</h1>
           <p style={{ fontSize: 16, color: "var(--ink-soft)", lineHeight: 1.5, margin: 0 }}>
             The absolute fastest path to speaking conversational Spanish. From zero to B1.
           </p>

@@ -23,7 +23,7 @@ export interface DaySession {
 export const todayKey = () => new Date().toISOString().slice(0, 10);
 const freshDay = (): DaySession => ({ date: todayKey(), repasar: false, aprender: false, hablar: false });
 
-interface SendaState {
+interface HolitaState {
   // Global UI State
   tab: string;
   view: string | null;
@@ -56,7 +56,7 @@ interface SendaState {
   completeOnboarding: () => void;
 }
 
-export const useStore = create<SendaState>()(
+export const useStore = create<HolitaState>()(
   persist(
     (set, get) => ({
       // Initial UI State
@@ -161,7 +161,7 @@ export const useStore = create<SendaState>()(
       addGenLesson: (lesson) => set((state) => ({ genLessons: [...state.genLessons, lesson] }))
     }),
     {
-      name: 'senda-storage',
+      name: 'holita-storage',
       // We don't want to persist UI state like tab and view, only core user data.
       partialize: (state) => ({
         progress: state.progress,

@@ -1,9 +1,9 @@
 {
-  "name": "senda",
+  "name": "holita",
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "Senda — a frequency-first Spanish course (A1 → B1) with an AI tutor. PWA, bring-your-own Gemini key.",
+  "description": "Holita — a frequency-first Spanish course (A1 → B1) with an AI tutor. PWA, bring-your-own Gemini key.",
   "scripts": {
     "start": "node server.js",
     "server": "node server.js",

@@ -1,4 +1,4 @@
-// Senda curriculum — neutral Latin American Spanish (tú / ustedes, no vosotros).
+// Holita curriculum — neutral Latin American Spanish (tú / ustedes, no vosotros).
 // Frequency-first: earliest lessons teach the highest-leverage words & structures.
 // 40 lessons total: A1 (1–8), A2 (9–20), B1 (21–40).
 
