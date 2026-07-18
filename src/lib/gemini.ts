@@ -70,7 +70,9 @@ export async function geminiGenerate({
 
   if (!res.ok) {
     if (res.status === 500) throw new GeminiError("BAD_KEY", "Backend missing valid API key.");
-    throw new GeminiError("HTTP_" + res.status, "Server returned an error (" + res.status + ").");
+    const data = await res.json().catch(() => ({}));
+    const errMsg = data.error?.message || `Server returned an error (${res.status}).`;
+    throw new GeminiError("HTTP_" + res.status, errMsg);
   }
 
   const data = await res.json();

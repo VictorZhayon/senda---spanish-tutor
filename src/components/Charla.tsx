@@ -10,7 +10,11 @@ function friendlyError(e: unknown) {
   if (code === "BAD_KEY") return "The backend API key is invalid.";
   if (code === "RATE_LIMIT") return "Gemini is rate-limiting. Wait a moment and try again.";
   if (code === "NETWORK" || code === "HTTP_504" || code === "HTTP_502" || code === "HTTP_404") return "Couldn't reach the server — check your connection or start the backend.";
-  return "Something went wrong. Try again.";
+  
+  if (e instanceof GeminiError && e.message && e.message !== code) {
+    return `Something went wrong: ${e.message}`;
+  }
+  return "Something went wrong. Try again. (" + code + ")";
 }
 
 export default function Charla({ seedVocab, onFirstReply }: { seedVocab: any[]; onFirstReply?: () => void }) {
