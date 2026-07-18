@@ -9,7 +9,7 @@ function friendlyError(e: unknown) {
   const code = e instanceof GeminiError ? e.code : "UNKNOWN";
   if (code === "BAD_KEY") return "The backend API key is invalid.";
   if (code === "RATE_LIMIT") return "Gemini is rate-limiting. Wait a moment and try again.";
-  if (code === "NETWORK") return "Couldn't reach the server — check your connection or start the backend.";
+  if (code === "NETWORK" || code === "HTTP_504" || code === "HTTP_502" || code === "HTTP_404") return "Couldn't reach the server — check your connection or start the backend.";
   return "Something went wrong. Try again.";
 }
 
