@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { MessageCircle, Send, Loader2, Settings as SettingsIcon, Mic, MicOff } from "lucide-react";
 import { Speaker } from "./ui";
 import { tutorReply, tutorOpener, GeminiError } from "../lib/gemini";
-import { cleanForSpeech, listen, speak } from "../lib/speech";
+import { cleanForSpeech, listen, speak, unlockAudio } from "../lib/speech";
 import { useStore } from "../store/useStore";
 
 function friendlyError(e: unknown) {
@@ -39,6 +39,7 @@ export default function Charla({ seedVocab, onFirstReply }: { seedVocab: any[]; 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [msgs, loading]);
 
   const start = async () => {
+    unlockAudio();
     setStarted(true); setLoading(true); setErr("");
     try {
       const opener = await tutorOpener(seedVocab.map((v) => v.es), { model });
@@ -79,6 +80,7 @@ export default function Charla({ seedVocab, onFirstReply }: { seedVocab: any[]; 
       return;
     }
 
+    unlockAudio();
     setMicError("");
     setIsListening(true);
     micRef.current = listen(
